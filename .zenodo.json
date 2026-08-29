@@ -1,0 +1,27 @@
+{
+    "title": "pifira: Pressure-based Inverse Fire-heat-flux and Radiative-Area analysis",
+    "description": "<p>A data-agnostic Python toolkit for estimating fire heat input and effective flame-contact area for pressurized LPG tanks under localized (non-engulfing) flame exposure. It combines the closed-vessel pressure-rise method with a radiative (T&#8308;) weighted angular-temperature inversion to recover the effective fire-contact area and heat flux, and provides a dimensionless framework unifying localized and full-engulfment exposure across tank sizes, fill levels and orientations. No experimental data are bundled; users supply their own pressure and temperature series.</p>",
+    "license": {
+        "id": "MIT"
+    },
+    "upload_type": "software",
+    "creators": [
+        {
+            "name": "Lee, Woo-gui-yeon",
+            "affiliation": "Korea Gas Safety Corporation (KGS), AI Safety Research Team",
+            "orcid": "0009-0008-8976-5363"
+        }
+    ],
+    "keywords": [
+        "LPG",
+        "fire safety",
+        "heat flux",
+        "pressure relief valve",
+        "closed-vessel pressure-rise method",
+        "BLEVE",
+        "inverse method",
+        "process safety",
+        "thermal engineering"
+    ],
+    "access_right": "open"
+}
