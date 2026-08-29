@@ -1,5 +1,9 @@
 # pifira
 
+[![PyPI](https://img.shields.io/pypi/v/pifira)](https://pypi.org/project/pifira/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22162092.svg)](https://doi.org/10.5281/zenodo.22162092)
+[![tests](https://github.com/lyullee/pifira/actions/workflows/tests.yml/badge.svg)](https://github.com/lyullee/pifira/actions)
+
 **P**ressure-based **I**nverse **F**ire-heat-flux and **R**adiative-**A**rea analysis
 
 A data-agnostic Python toolkit for estimating **fire heat input** and
