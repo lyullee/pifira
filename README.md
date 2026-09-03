@@ -2,150 +2,137 @@
 
 [![PyPI](https://img.shields.io/pypi/v/pifira)](https://pypi.org/project/pifira/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22162092.svg)](https://doi.org/10.5281/zenodo.22162092)
-[![tests](https://github.com/lyullee/pifira/actions/workflows/tests.yml/badge.svg)](https://github.com/lyullee/pifira/actions)
+[![tests](https://github.com/lyullee/pifira/actions/workflows/tests.yml/badge.svg)](https://github.com/lyullee/pifira/actions/workflows/tests.yml)
 
-**P**ressure-based **I**nverse **F**ire-heat-flux and **R**adiative-**A**rea analysis
+**P**ressure-based **I**nverse **F**ire-heat-flux and **R**adiative-**A**rea
+analysis, with evidence-gated liquid-hydrogen utilities.
 
-A data-agnostic Python toolkit for estimating **fire heat input** and
-**effective flame-contact area** for pressurized LPG tanks under **localized
-(non-engulfing) flame exposure**.
+`pifira` is a research toolkit for two related process-safety workflows:
 
-pifira combines the **closed-vessel pressure-rise method** (heat input from a
-measured pressure history) with a **radiative (T?? weighted angular-temperature
-inversion** (effective fire-contact area from surface temperatures), and
-provides a **dimensionless framework** that unifies localized and
-full-engulfment exposure across tank sizes, fill levels and orientations.
+1. estimating heat input and effective flame-contact area from pressure and
+   wall-temperature histories of pressurized LPG tanks; and
+2. evaluating traceable liquid-hydrogen (LH2) ortho-para thermodynamics,
+   published Milenko/Petitpas kinetics, and a CoolProp HEOS nozzle closure.
 
-> **No experimental data are bundled with this package.** All routines operate
-> on user-supplied arrays. See [Data sources](#data-sources) for how to obtain
-> the public validation datasets.
-
----
-
-## Why
-
-Most published fire-engulfment work assumes *uniform, full engulfment* of
-*horizontal* tanks. Small **vertical** LPG tanks under *localized* flame
-exposure are under-studied, and standards (API 521, KGS) do not cover heat-input
-estimation for this case. pifira addresses this by inverting a measured
-pressure rise for heat input and a measured angular temperature distribution
-for the effective contact area ??without assuming full engulfment.
+> **No experimental or validation data are distributed in the repository,
+> source archive, or wheel.** The validation material belongs to its original
+> publishers and depositors. [`VALIDATION_SOURCES.md`](https://github.com/lyullee/pifira/blob/main/VALIDATION_SOURCES.md)
+> identifies the original DOI or official download page, the evidence used,
+> and the limits of each comparison.
 
 ## Installation
 
 ```bash
-pip install pifira
+python -m pip install pifira
 ```
 
-Dependencies: `numpy`, `scipy`, `pandas`, `CoolProp`. Optional plotting extras:
+Python 3.10 or newer is required. Plotting support is optional:
 
 ```bash
-pip install "pifira[plot]"
+python -m pip install "pifira[plot]"
 ```
 
-## Quick start
+## LPG inverse-analysis example
 
 ```python
-import numpy as np
 import pifira
 
-# 1. Define the tank (volume, fluid, fill fraction)
 tank = pifira.TankSpec(
     volume=0.619,
     fluid="HEOS::Propane[0.95]&n-Butane[0.05]",
     fill=0.70,
 )
 
-# 2. Heat input from a pressure history (bring your own arrays)
-#    t [s], P [bar gauge], closed-vessel window before PRV opens
-Q_W = pifira.heat_input(P1_bar=10.83, P2_bar=16.30, dt=544.5, tank=tank)
-print(Q_W / 1000, "kW")
-
-# 3. Effective contact area from angular wall temperatures
-#    flame centre at 0 deg; off-flame points at +/-90, 180
-res = pifira.effective_arc(
-    angles_deg=[0, 90, 180, -90],
-    T_wall_C=[271, 49, 39, 46],   # period-averaged wall temps
-    T_amb_C=35.0,
+heat_W = pifira.heat_input(
+    P1_bar=10.83,
+    P2_bar=16.30,
+    dt=544.5,
+    tank=tank,
 )
-arc_deg = res["arc_deg"]          # area-preserving equivalent width
 
-h_eff = pifira.effective_height(flame_height_m=0.767, liquid_height_m=0.885)
-A_eff = pifira.effective_area(diameter_m=0.75, arc_deg=arc_deg, height_m=h_eff)
+arc = pifira.effective_arc(
+    angles_deg=[0, 90, 180, -90],
+    T_wall_C=[271, 49, 39, 46],
+    T_amb_C=35.0,
+)["arc_deg"]
 
-# 4. Heat flux
-print(pifira.heat_flux(Q_W, A_eff), "kW/m^2")
+height = pifira.effective_height(flame_height_m=0.767, liquid_height_m=0.885)
+area = pifira.effective_area(diameter_m=0.75, arc_deg=arc, height_m=height)
+print(pifira.heat_flux(heat_W, area), "kW/m2")
 ```
 
-A full time-varying workflow (moving-window heat input, per-instant effective
-arc, heat-input-weighted representative value) is in
-[`examples/analyze_localized.py`](examples/analyze_localized.py).
+The pressure-rise calculation uses a closed-vessel interval before relief
+venting. The internal energy is evaluated with CoolProp while total mass and
+vessel volume remain fixed. The effective circumferential width is obtained
+from a Gaussian fit to the radiative driving force
+`T_wall^4 - T_ambient^4`.
+
+## LH2 evidence-gated example
+
+```python
+from pifira.lh2 import MilenkoCorrelation, RigidRotorSpinThermo
+
+thermo = RigidRotorSpinThermo()
+print(thermo.equilibrium_ortho(20.3))
+print(thermo.conversion_energy_J_per_kg(20.3))
+
+kinetics = MilenkoCorrelation()
+k = kinetics.forward_rate_per_s(
+    temperature_K=20.3,
+    density_kg_m3=70.0,
+    phase="liquid",
+)
+print(k, "1/s")
+```
+
+The LH2 functions enforce the reported temperature, density, phase and
+composition domains by default. They do not constitute a certified relief
+valve sizing method. In particular, the package does not infer a discharge
+coefficient, effective area, lift law or two-phase capacity for a commercial
+PSV from pressure cycling alone.
 
 ## Public API
 
-| Area | Functions |
+| Area | Public objects |
 |---|---|
-| Heat input (pressure-rise) | `TankSpec`, `internal_energy`, `liquid_height`, `heat_input`, `heat_input_series` |
-| Effective area (inversion) | `radiative_driving_force`, `effective_arc`, `effective_height`, `effective_area`, `heat_flux` |
-| Representative value | `heat_input_weighted_mean`, `simple_mean` |
-| Dimensionless framework | `coverage_fraction` (?), `normalized_flux` (q\*), `pressurization_number` (?), `orientation_factor` (Ω) |
-| I/O | `load_pressure_csv`, `load_temperature_csv` |
+| LPG pressure rise | `TankSpec`, `internal_energy`, `liquid_height`, `heat_input`, `heat_input_series` |
+| Effective area | `radiative_driving_force`, `effective_arc`, `effective_height`, `effective_area`, `heat_flux` |
+| Representative values | `heat_input_weighted_mean`, `simple_mean`, `coverage_fraction`, `normalized_flux`, `pressurization_number`, `orientation_factor` |
+| File input | `load_pressure_csv`, `load_temperature_csv` |
+| LH2 spin thermodynamics | `pifira.lh2.RigidRotorSpinThermo` |
+| LH2 published kinetics | `pifira.lh2.MilenkoCorrelation`, `pifira.lh2.CorrelationDomainError` |
+| LH2 nozzle utility | `pifira.lh2.HEOSNozzleLookup`, `pifira.lh2.heos_nozzle_lookup` |
 
-## Method summary
+## Validation-data policy
 
-1. **Closed-vessel pressure-rise.** Before pressure-relief venting, incident
-   heat converts entirely into the contents' internal-energy rise:
-   `Q = dU/dt = d/dt(m_L u_L + m_V u_V)`. Mass and volume are fixed; the
-   liquid/vapour split is re-flashed at each pressure (CoolProp).
+Only source metadata and acquisition instructions are versioned. The project
+does not redistribute source PDFs, spreadsheets, presentation files, figure
+rasters, digitized traces, or derived validation tables. Users who reproduce a
+comparison must obtain the material from the original source, comply with its
+terms, and keep it outside version control. See
+[`VALIDATION_SOURCES.md`](https://github.com/lyullee/pifira/blob/main/VALIDATION_SOURCES.md).
 
-2. **Radiative (T?? angular inversion.** Radiative flux scales with
-   `T_wall????T_amb?? (Stefan-Boltzmann). Angular wall temperatures are fit
-   with a Gaussian; the area-preserving equivalent width `??2?)·?` gives the
-   effective arc.
+Package releases are checked automatically for common third-party data and
+document formats before PyPI publication.
 
-3. **Axial intersection.** Effective height = min(flame contact height, wetted
-   liquid height). Vapour-space wall is excluded.
+## Scope and safety
 
-4. **Representative value.** Heat-input-weighted mean `Σ(q·Q)/ΣQ`, since fire
-   safety is governed by high-heat-input instants.
+`pifira` is research software. It is not an ISO 21013, API 520/521, ASME or
+KGS design implementation, and it must not replace certified sizing,
+manufacturer capacity data, or engineering review. A successful numerical
+reproduction means that the code regenerated a reported result; it does not by
+itself establish physical validation or fitness for safety-critical use.
 
-5. **Dimensionless framework.** ? (coverage), q\* (normalized flux), ?
-   (pressurization), Ω (orientation) unify localized/full and vertical/horizontal.
+## Citation and release history
 
-## Data sources
-
-pifira ships **no data**. The public datasets used to validate the method in
-the associated study are available from their original publications:
-
-- **Moodie, K., Billinge, K., Cutler, D.P. (1988).** *Fire Engulfment of LPG
-  Storage Tanks.* IChemE Symposium Series No. 93, pp. 87??06. Institution of
-  Chemical Engineers. ??pressure history (Fig. 5) and initial conditions /
-  heat fluxes (Tables 1??). Obtain from IChemE or a library.
-
-- **Birk, A.M., Poirier, D., Davison, C. (2006).** *On the thermal rupture of
-  1.9 m³ propane pressure vessels with defects in their thermal protection
-  system.* Journal of Loss Prevention in the Process Industries **19**(6),
-  582??97. https://doi.org/10.1016/j.jlp.2006.02.002 ??pressure (Fig. 8) and
-  lading-temperature stratification (Fig. 10) for the 25% partial-engulfment
-  test. Obtain from the publisher.
-
-To reproduce the validation, digitize the relevant figures from the original
-papers and pass the values to the pifira API. Digitized values are **not**
-redistributed here.
-
-Experimental data from the authors' own fire tests are **not** included and are
-reported separately.
-
-## Citing
-
-If you use pifira, please cite it via [`CITATION.cff`](CITATION.cff) and the
-archived release DOI (Zenodo). See the repository release page for the DOI.
+Use [`CITATION.cff`](https://github.com/lyullee/pifira/blob/main/CITATION.cff)
+and cite the archived Zenodo release. The
+badge above uses the concept DOI, which resolves to the newest archived
+version. Changes are listed in
+[`CHANGELOG.md`](https://github.com/lyullee/pifira/blob/main/CHANGELOG.md).
 
 ## License
 
-MIT ??see [LICENSE](LICENSE).
-
-## Author
-
-Woo-gui-yeon Lee, Korea Gas Safety Corporation (KGS), AI Safety Research Team
-([ORCID 0009-0008-8976-5363](https://orcid.org/0009-0008-8976-5363)).
+The software is released under the
+[MIT License](https://github.com/lyullee/pifira/blob/main/LICENSE). Third-party source
+material is not covered by that license and is not included.

@@ -1,123 +1,179 @@
-# 배포 가이드 (GitHub → Zenodo DOI → PyPI)
+# pifira 0.2.0 배포 가이드
 
-이 문서는 `pifira` 패키지를 공개 배포하는 실제 절차입니다.
-코드·설정은 모두 준비돼 있으니, 아래 계정 작업만 순서대로 하면 됩니다.
+이 문서는 이미 공개된 `lyullee/pifira`의 두 번째 릴리스를 만드는
+절차다. 신규 저장소 생성 절차가 아니다.
 
-배포 전 확인:
-- 실측 데이터(CSV)·논문 원문(PDF)은 패키지에 **포함돼 있지 않음** (확인 완료)
-- `.gitignore`가 `*.csv`, `*.pdf`를 무시하므로 실수로도 커밋 안 됨
-- `pyproject.toml`·`README.md`의 `USERNAME`을 실제 GitHub 아이디로 교체 필요
+현재 공개 상태:
 
----
+- GitHub release: `v0.1.0`
+- PyPI: `pifira 0.1.0`
+- Zenodo version DOI: `10.5281/zenodo.22162093`
+- Zenodo concept DOI: `10.5281/zenodo.22162092`
+- 이번 후보 버전: `0.2.0`
 
-## 0. 사전 준비 (한 번만)
+원자료는 어디에도 올리지 않는다. GitHub, GitHub release 자동 소스
+압축본, Zenodo, PyPI wheel/sdist에는 DOI와 공식 출처 목록만 들어간다.
 
-- GitHub 계정
-- PyPI 계정 (https://pypi.org/account/register/)
-- Zenodo 계정 (https://zenodo.org — GitHub으로 로그인 가능)
+## 1. 한 번만 확인할 계정 설정
 
----
+### PyPI Trusted Publisher
 
-## 1. GitHub 저장소 생성 및 push
+PyPI의 `pifira` 프로젝트에서 **Manage > Publishing**으로 들어가 GitHub
+publisher가 다음과 정확히 일치하는지 확인한다.
 
-```bash
-# 저장소 폴더에서
-cd pifira
+| 항목 | 값 |
+|---|---|
+| PyPI project | `pifira` |
+| GitHub owner | `lyullee` |
+| Repository | `pifira` |
+| Workflow | `publish.yml` |
+| Environment | `pypi` |
 
-# USERNAME을 실제 아이디로 바꾼 뒤:
-#   pyproject.toml 의 project.urls
-#   README.md 의 링크
-#   CITATION.cff 의 repository-code
-# (에디터로 일괄 치환 권장)
+GitHub 저장소의 **Settings > Environments**에도 `pypi` 환경을 만든다.
+가능하면 본인 승인을 required reviewer로 설정한다. 장기 API token은
+필요하지 않다.
 
-git init
+### Zenodo GitHub 연결
+
+`v0.1.0`이 이미 Zenodo에 등록됐으므로 연결 이력은 있다. 그래도 Zenodo
+프로필의 **GitHub** 화면에서 저장소 목록을 동기화하고 `pifira` 스위치가
+켜져 있는지 확인한다. 이 상태에서 새 GitHub release를 공개하면 Zenodo가
+새 버전을 수집한다.
+
+## 2. 로컬 후보 검사
+
+저장소 루트에서 PowerShell로 실행한다.
+
+```powershell
+py -3.12 -m venv .venv-release
+.\.venv-release\Scripts\python.exe -m pip install --upgrade pip
+.\.venv-release\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv-release\Scripts\python.exe -m pytest -q
+.\.venv-release\Scripts\python.exe -m build
+.\.venv-release\Scripts\python.exe -m twine check dist/*
+.\.venv-release\Scripts\python.exe tools/check_distribution.py dist/*
+```
+
+마지막 두 명령이 모두 PASS여야 한다. `dist`에는 다음 두 파일만 생기는
+것이 정상이다.
+
+```text
+pifira-0.2.0-py3-none-any.whl
+pifira-0.2.0.tar.gz
+```
+
+압축본 내부에 PDF, Word, PowerPoint, Excel, CSV, 그림 또는
+`literature_sources`/`validation-data` 폴더가 있으면 배포하지 않는다.
+
+## 3. 변경 검토와 GitHub 반영
+
+```powershell
+git status --short
+git diff --check
+git diff --stat
+git diff
+```
+
+의도한 변경만 확인한 뒤 커밋하고 main에 올린다.
+
+```powershell
 git add .
-git commit -m "Initial release: pifira 0.1.0"
-git branch -M main
-git remote add origin https://github.com/USERNAME/pifira.git
-git push -u origin main
+git commit -m "Prepare pifira 0.2.0"
+git push origin main
 ```
 
-push 후 GitHub Actions의 `tests` 워크플로가 자동 실행되어 4개 파이썬
-버전에서 테스트가 도는지 확인하세요 (Actions 탭).
+GitHub **Actions**에서 `tests`가 Python 3.10-3.13 및 distribution 검사까지
+모두 통과하는지 확인한다. 실패 상태에서 release를 만들지 않는다.
 
----
+## 4. GitHub release 공개
 
-## 2. Zenodo DOI 연동 (GitHub Release 시 자동 발급)
+저장소의 **Releases > Draft a new release**에서 다음처럼 설정한다.
 
-1. https://zenodo.org 에 GitHub 계정으로 로그인
-2. 우측 상단 → **GitHub** 메뉴
-3. 저장소 목록에서 `pifira`의 스위치를 **ON**
-4. GitHub에서 **Release**를 만들면 Zenodo가 자동으로 아카이빙 + DOI 발급
+- 새 태그: `v0.2.0`
+- Target: 검사에 통과한 `main` 커밋
+- 제목: `pifira 0.2.0`
+- 본문: `RELEASE_NOTES_v0.2.0.md` 내용
+- Pre-release: 선택하지 않음
+- Latest release: 선택
 
-Release 만들기 (GitHub 웹 또는 CLI):
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-그 뒤 GitHub 저장소 → **Releases** → **Draft a new release** →
-태그 `v0.1.0` 선택 → **Publish release**.
+먼저 draft 상태로 내용과 태그 대상을 재확인한 뒤 **Publish release**를
+누른다. release 공개가 PyPI workflow와 Zenodo 수집을 동시에 시작한다.
 
-- 발급된 DOI는 Zenodo 배지로 README에 추가할 수 있습니다.
-- `.zenodo.json`의 메타데이터(제목·저자·ORCID·키워드)가 자동 반영됩니다.
-- 이후 버전마다 새 DOI + 항상 최신을 가리키는 "concept DOI"가 생깁니다.
+CLI로 할 경우에도 같은 태그와 노트를 사용한다.
 
----
-
-## 3. PyPI 배포
-
-### 방법 A — Trusted Publishing (권장, 토큰 불필요)
-
-1. https://pypi.org → 로그인 → **Your projects** → **Publishing**
-2. **Add a new pending publisher** 등록:
-   - PyPI Project Name: `pifira`
-   - Owner: `USERNAME` (GitHub)
-   - Repository name: `pifira`
-   - Workflow name: `publish.yml`
-3. 이후 GitHub에서 **Release를 Publish하면** `publish.yml`이 자동으로
-   빌드·업로드합니다 (`.github/workflows/publish.yml`이 이미 OIDC 설정됨).
-
-### 방법 B — API 토큰 수동 업로드
-
-```bash
-pip install build twine
-python -m build
-python -m twine upload dist/*
-# 사용자명: __token__
-# 비밀번호: pypi-... (PyPI에서 발급한 API 토큰)
+```powershell
+gh release create v0.2.0 --target main --title "pifira 0.2.0" --notes-file RELEASE_NOTES_v0.2.0.md
 ```
 
-배포 후 확인:
-```bash
-pip install pifira
-python -c "import pifira; print(pifira.__version__)"
+## 5. PyPI 확인
+
+GitHub **Actions > publish**가 성공했는지 확인한다. 그 다음 깨끗한 임시
+환경에서 실제 PyPI 파일을 설치한다.
+
+```powershell
+py -3.12 -m venv .venv-pypi-check
+.\.venv-pypi-check\Scripts\python.exe -m pip install --upgrade pip
+.\.venv-pypi-check\Scripts\python.exe -m pip install --no-cache-dir pifira==0.2.0
+.\.venv-pypi-check\Scripts\python.exe -c "import pifira; print(pifira.__version__)"
+.\.venv-pypi-check\Scripts\python.exe -c "from pifira.lh2 import RigidRotorSpinThermo; print(RigidRotorSpinThermo().equilibrium_ortho(20.3))"
 ```
 
----
+버전은 `0.2.0`이어야 한다. PyPI 파일은 같은 버전으로 덮어쓸 수 없으므로
+업로드 후 코드 오류가 발견되면 `0.2.0`을 재사용하지 말고 `0.2.1`로
+수정한다.
 
-## 4. 배포 후 마무리
+## 6. Zenodo DOI 확인
 
-- README 상단에 배지 추가 (선택):
-  ```markdown
-  [![PyPI](https://img.shields.io/pypi/v/pifira)](https://pypi.org/project/pifira/)
-  [![DOI](https://zenodo.org/badge/DOI/<your-doi>.svg)](https://doi.org/<your-doi>)
-  [![tests](https://github.com/USERNAME/pifira/actions/workflows/tests.yml/badge.svg)](https://github.com/USERNAME/pifira/actions)
-  ```
-- 논문에서 인용 시: Zenodo DOI(소프트웨어) + 논문(방법론)을 함께 인용.
+Zenodo의 GitHub 화면에서 `v0.2.0` 처리 완료를 기다린다. 새 record에서
+다음을 확인한다.
 
----
+- 제목과 설명이 `.zenodo.json`과 일치함
+- version이 `v0.2.0`임
+- creator와 ORCID가 맞음
+- license가 MIT임
+- 새 **version DOI**가 발급됨
+- concept DOI가 계속 `10.5281/zenodo.22162092`임
+- release archive에 검증 원자료가 없음
 
-## 버전 올릴 때 (다음 릴리스)
+README의 DOI 배지는 concept DOI를 사용하므로 매 릴리스마다 바꿀 필요가
+없다. 논문에서 특정 소프트웨어 판을 인용하려면 Zenodo가 새로 발급한
+`v0.2.0` version DOI를 쓴다.
 
-1. `pyproject.toml`, `src/pifira/__init__.py`, `CITATION.cff`의 버전 갱신
-2. commit → push
-3. 새 태그 + GitHub Release → Zenodo 새 DOI + PyPI 자동 배포
+## 7. 최종 공개 확인
 
----
+아래 세 페이지에서 버전과 링크가 서로 맞는지 확인한다.
 
-## 이름 관련 참고
+- GitHub: <https://github.com/lyullee/pifira/releases/tag/v0.2.0>
+- PyPI: <https://pypi.org/project/pifira/0.2.0/>
+- Zenodo concept record: <https://doi.org/10.5281/zenodo.22162092>
 
-PyPI에서 `pifira`가 이미 사용 중이면 등록이 거부됩니다. 업로드 직전
-https://pypi.org/project/pifira/ 를 확인하세요. 충돌 시 대안:
-`pifira-lpg`, `pyfira`, `firecvp` 등 (pyproject.toml의 name과
-`src/pifira/` 폴더명을 함께 바꿔야 함).
+새 Zenodo version DOI는 발급 후 release 메모와 논문 Data and code
+availability 문장에 기록한다. concept DOI와 version DOI를 혼동하지 않는다.
+
+## 8. 논문에 넣을 권장 문장
+
+릴리스가 실제로 완료된 뒤 `<VERSION_DOI>`만 새 DOI로 바꾼다.
+
+> Reusable software components are available as pifira v0.2.0 on GitHub and
+> PyPI and are archived at Zenodo (version DOI: <VERSION_DOI>; concept DOI:
+> 10.5281/zenodo.22162092). Third-party validation files, source publications,
+> digitized traces and derived validation tables are not redistributed.
+> Persistent identifiers and official acquisition locations are listed in
+> VALIDATION_SOURCES.md. Study-specific analysis scripts and the complete audit
+> record are available from the corresponding author on reasonable request.
+
+이 문장은 공개 패키지가 실제 원고 전체 재현 코드를 모두 포함한다고
+과장하지 않으면서, 공개한 재사용 모듈과 제3자 자료의 경계를 명확히 한다.
+
+## 9. 실패 시 처리
+
+- `tests` 실패: release를 만들지 않고 main에서 수정한다.
+- `publish` 실패 전 PyPI 업로드 없음: 같은 `v0.2.0` release workflow를
+  원인 수정 후 재실행할 수 있다.
+- PyPI에 일부 파일이라도 `0.2.0`이 등록됨: 버전을 `0.2.1`로 올린다.
+- Zenodo 수집 실패: release나 태그를 성급히 삭제하지 말고 Zenodo
+  GitHub 화면의 오류를 확인한다. 메타데이터를 수정한 뒤 새 patch release를
+  만드는 것이 가장 추적하기 쉽다.
+- 원자료가 실수로 커밋됨: release를 중단하고 git history와 이미 생성된
+  archive의 노출 여부를 별도로 처리한다. 단순 `.gitignore` 추가만으로는
+  이미 커밋된 파일이 제거되지 않는다.

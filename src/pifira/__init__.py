@@ -8,7 +8,8 @@ flame exposure, using the closed-vessel pressure-rise method combined with a
 radiative (T^4) weighted angular-temperature inversion.
 
 No experimental data are bundled. Supply your own pressure/temperature series;
-see the ``examples`` directory for the analysis workflow.
+see the ``examples`` directory and ``VALIDATION_SOURCES.md`` for the analysis
+workflow and source provenance.
 
 Public API
 ----------
@@ -48,7 +49,7 @@ from .representative import (
 )
 from .io import load_pressure_csv, load_temperature_csv
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "TankSpec", "internal_energy", "liquid_height", "heat_input",
