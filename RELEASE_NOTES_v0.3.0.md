@@ -26,3 +26,7 @@ calculate, certify or reduce pressure-relief-device capacity.
 No experimental data, source documents, digitized traces, derived validation
 tables or manuscript outputs are included. Original sources and claim limits
 remain listed in `VALIDATION_SOURCES.md`.
+
+Archived release: <https://doi.org/10.5281/zenodo.22291661>
+
+Concept DOI: <https://doi.org/10.5281/zenodo.22162092>

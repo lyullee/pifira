@@ -5,11 +5,11 @@
 
 현재 공개 상태:
 
-- GitHub tag/source commit: `v0.2.0` / `5d184902fec2fb40ed45435eb2cbddbf16db70c7`
-- PyPI: `pifira 0.2.0` (Trusted Publishing 확인됨)
-- Zenodo version DOI: `10.5281/zenodo.22270499`
+- GitHub tag/source commit: `v0.3.0` / `00c61233d754ca0b5257899e7ffe2938f0204736`
+- PyPI: `pifira 0.3.0` (Trusted Publishing 확인됨)
+- Zenodo version DOI: `10.5281/zenodo.22291661`
 - Zenodo concept DOI: `10.5281/zenodo.22162092`
-- 이번 후보 버전: `0.3.0`
+- 배포 완료 버전: `0.3.0`
 
 원자료는 어디에도 올리지 않는다. GitHub, GitHub release 자동 소스
 압축본, Zenodo, PyPI wheel/sdist에는 DOI와 공식 출처 목록만 들어간다.
@@ -132,7 +132,7 @@ Zenodo의 GitHub 화면에서 `v0.3.0` 처리 완료를 기다린다. 새 record
 - version이 `v0.3.0`임
 - creator와 ORCID가 맞음
 - license가 MIT임
-- 새 **version DOI**가 발급됨
+- **version DOI**가 `10.5281/zenodo.22291661`로 발급됨
 - concept DOI가 계속 `10.5281/zenodo.22162092`임
 - release archive에 검증 원자료가 없음
 
@@ -146,17 +146,18 @@ README의 DOI 배지는 concept DOI를 사용하므로 매 릴리스마다 바�
 
 - GitHub: <https://github.com/lyullee/pifira/releases/tag/v0.3.0>
 - PyPI: <https://pypi.org/project/pifira/0.3.0/>
+- Zenodo version record: <https://doi.org/10.5281/zenodo.22291661>
 - Zenodo concept record: <https://doi.org/10.5281/zenodo.22162092>
 
-새 Zenodo version DOI는 발급 후 release 메모와 논문 Data and code
-availability 문장에 기록한다. concept DOI와 version DOI를 혼동하지 않는다.
+Zenodo version DOI는 release 메모와 논문 Data and code availability 문장에
+기록한다. concept DOI와 version DOI를 혼동하지 않는다.
 
 ## 8. 논문에 넣을 권장 문장
 
-릴리스가 실제로 완료된 뒤 `<VERSION_DOI>`만 새 DOI로 바꾼다.
+릴리스 완료 후 사용하는 확정 문장은 다음과 같다.
 
 > Reusable software components are available as pifira v0.3.0 on GitHub and
-> PyPI and are archived at Zenodo (version DOI: <VERSION_DOI>; concept DOI:
+> PyPI and are archived at Zenodo (version DOI: 10.5281/zenodo.22291661; concept DOI:
 > 10.5281/zenodo.22162092). Third-party validation files, source publications,
 > digitized traces and derived validation tables are not redistributed.
 > Persistent identifiers and official acquisition locations are listed in

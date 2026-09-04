@@ -17,6 +17,9 @@ version: "0.3.0"
 license: MIT
 identifiers:
   - type: doi
+    value: "10.5281/zenodo.22291661"
+    description: "Version DOI for pifira 0.3.0"
+  - type: doi
     value: "10.5281/zenodo.22162092"
     description: "Concept DOI resolving to the latest archived release"
 keywords:

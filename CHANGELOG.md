@@ -4,6 +4,8 @@ All notable changes to `pifira` are recorded here.
 
 ## 0.3.0 - 2026-09-04
 
+Archived version DOI: <https://doi.org/10.5281/zenodo.22291661>.
+
 ### Added
 
 - Separate para-composition thresholds for a sign test at one saturated state

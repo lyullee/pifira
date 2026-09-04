@@ -4,9 +4,9 @@ Checked: 2026-09-04 (Asia/Seoul)
 
 ## Outcome
 
-The local `0.3.0` candidate is ready for author review, commit and release. It
-has not been pushed or published by this check. The existing public `0.2.0`
-release remains unchanged.
+The `0.3.0` candidate passed its release checks and was published on
+2026-09-04. GitHub tag `v0.3.0` resolves to commit
+`00c61233d754ca0b5257899e7ffe2938f0204736`.
 
 ## Scope of the release
 
@@ -73,13 +73,20 @@ A separate local-only archive was created outside the Git repository:
 The private archive contains third-party material and must not be uploaded to
 GitHub, Zenodo, PyPI or a public journal supplement.
 
-## Remaining release-owner actions
+## Post-release verification
 
-1. Review the Git diff and commit the `0.3.0` candidate.
-2. Push `main` and confirm the tests workflow passes.
-3. Create and publish GitHub release/tag `v0.3.0` from `main` using
-   `RELEASE_NOTES_v0.3.0.md`.
-4. Confirm the Trusted Publishing workflow creates PyPI `0.3.0`.
-5. Confirm Zenodo archives `v0.3.0`, then record its newly issued version DOI.
-6. Replace `<VERSION_DOI>` in the manuscript availability statement only
-   after the Zenodo record exists.
+- GitHub release: <https://github.com/lyullee/pifira/releases/tag/v0.3.0>
+- GitHub tests workflow: PASS on Python 3.10, 3.11, 3.12 and 3.13.
+- GitHub publish workflow: PASS.
+- PyPI: <https://pypi.org/project/pifira/0.3.0/>
+- Clean installation from the PyPI Simple Index: PASS.
+- Installed pathwise threshold at 50 psia: `99.79505843112076%` para.
+- PyPI wheel SHA-256:
+  `66d53e8301aec0d4381e0d791188e62794f0b4a7fa438310bd0871b627cf8ea4`
+- PyPI sdist SHA-256:
+  `265e9b42822f18f63c2b2686a46fcd4d5c248aa9b2421043f3fbf935606f8eb0`
+- Zenodo version DOI: <https://doi.org/10.5281/zenodo.22291661>
+- Zenodo concept DOI: <https://doi.org/10.5281/zenodo.22162092>
+
+The version DOI can now replace `<VERSION_DOI>` in the manuscript availability
+statement. No public release contains the private reproduction archive.

@@ -161,7 +161,8 @@ itself establish physical validation or fitness for safety-critical use.
 ## Citation and release history
 
 Use [`CITATION.cff`](https://github.com/lyullee/pifira/blob/main/CITATION.cff)
-and cite the archived Zenodo release. The
+and cite the archived Zenodo release. Version 0.3.0 is archived at
+[doi:10.5281/zenodo.22291661](https://doi.org/10.5281/zenodo.22291661). The
 badge above uses the concept DOI, which resolves to the newest archived
 version. Changes are listed in
 [`CHANGELOG.md`](https://github.com/lyullee/pifira/blob/main/CHANGELOG.md).
