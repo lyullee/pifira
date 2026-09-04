@@ -1,6 +1,6 @@
 # Validation-source registry
 
-Updated 2026-09-03 for the `pifira` 0.2.0 release candidate.
+Updated 2026-09-04 for the `pifira` 0.3.0 release candidate.
 
 ## Distribution policy
 
@@ -67,15 +67,21 @@ GitHub, Zenodo and PyPI.
 
 ## Claim boundary retained with the source registry
 
-The source inventory supports bounded component statements about published OP
-kinetics, heat-location sensitivity, cold-gas fixed-nozzle transfer,
+The source inventory supports the directly observed Petitpas full-scale
+dormancy benefit, bounded statements about published OP kinetics,
+heat-location sensitivity, cold-gas fixed-nozzle transfer,
 commercial-valve traceability, and cryogenic opening/reseat behavior. It does
 not support:
 
 - an HV-SV-02 orifice, lift law, discharge coefficient or open-state flow;
 - certified two-phase LH2 relief capacity;
-- a quantitatively validated coupled tank-PSV transient; or
+- a universal OP kinetic relation or generally transferable LH2 tank model;
+- a quantitatively validated coupled tank-PSV transient or a generic
+  standards-capacity reduction factor; or
 - replacement of ISO/API/ASME/KGS procedures or manufacturer certification.
 
 The missing synchronized LH2 pressure-temperature-lift-mass-flow dataset is an
-explicit evidence gap, not a parameter to be filled by assumption.
+explicit evidence gap when cycling, chatter or partial-opening dynamics are
+the intended claim; it is not a parameter to be filled by assumption. A
+scenario relief-demand calculation may instead remain separate from the
+certified device-capacity and installation checks.

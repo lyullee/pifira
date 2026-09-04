@@ -2,7 +2,36 @@
 
 All notable changes to `pifira` are recorded here.
 
-## 0.2.0 - release candidate
+## 0.3.0 - 2026-09-04
+
+### Added
+
+- Separate para-composition thresholds for a sign test at one saturated state
+  and a non-heating guarantee over a declared saturated path.
+- A transparent equilibrium-path ledger reporting initial adverse inventory,
+  warming reverse capacity, target-state contrast and sign crossover.
+- A one-sided composition-allowance helper that exposes physically infeasible
+  requirements instead of clipping them to 100% para.
+- A data-free reproduction example for the 50 psia and 99.7%-para landmarks.
+
+### Changed
+
+- Clarified the evidence ladder between adverse-source screening,
+  experiment-specific dormancy or first-opening credit, and any later
+  standards-facing capacity decision.
+- Updated package, citation, Zenodo and deployment metadata for version 0.3.0.
+
+### Unchanged boundaries
+
+- The new functions return equilibrium-direction thermodynamic potentials;
+  realized heat still requires a qualified kinetic and system path.
+- No function reduces certified device capacity or replaces ISO/API/ASME/KGS
+  procedures, manufacturer ratings or engineering review.
+- No third-party validation data are distributed.
+
+## 0.2.0 - 2026-09-03
+
+Archived version DOI: <https://doi.org/10.5281/zenodo.22270499>.
 
 ### Added
 

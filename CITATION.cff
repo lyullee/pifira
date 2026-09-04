@@ -4,15 +4,16 @@ title: "pifira: Pressure-based inverse fire analysis with evidence-gated LH2 uti
 abstract: >-
   A data-agnostic Python toolkit for pressure-based inverse fire heat analysis
   of pressurized tanks, supplemented by evidence-gated liquid-hydrogen
-  ortho-para thermodynamics, published natural-conversion kinetics, and
-  fixed-nozzle comparators. No experimental or validation data are bundled.
+  ortho-para thermodynamics, state-point and pathwise composition screens,
+  published natural-conversion kinetics, and fixed-nozzle comparators. No
+  experimental or validation data are bundled.
 type: software
 authors:
   - given-names: "Ugwiyeon"
     family-names: "Lee"
     affiliation: "Korea Gas Safety Corporation (KGS), AI Safety Research Team"
     orcid: "https://orcid.org/0009-0008-8976-5363"
-version: "0.2.0"
+version: "0.3.0"
 license: MIT
 identifiers:
   - type: doi
@@ -25,6 +26,7 @@ keywords:
   - heat flux
   - pressure relief valve
   - ortho-para hydrogen
+  - pathwise composition criterion
   - closed-vessel pressure-rise method
   - process safety
 repository-code: "https://github.com/lyullee/pifira"

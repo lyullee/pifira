@@ -10,8 +10,14 @@ from pifira.lh2 import (
     MilenkoCorrelation,
     NozzleDomainError,
     RigidRotorSpinThermo,
+    apply_para_composition_allowance,
+    crossover_saturation_state,
+    equilibrium_path_ledger,
     ideal_gas_nozzle,
+    required_para_fraction_for_nonheating,
+    required_para_fraction_for_pathwise_nonheating,
     require_common_energy_reference,
+    signed_equilibrium_heat_J_per_kg,
 )
 
 
@@ -91,6 +97,62 @@ def test_common_reference_guard():
     with pytest.raises(ValueError, match="common-reference"):
         require_common_energy_reference(False)
     require_common_energy_reference(True)
+
+
+def test_state_point_and_pathwise_para_thresholds_are_distinct():
+    pressure_Pa = 50.0 * 6894.757293168
+    state_point = required_para_fraction_for_nonheating(pressure_Pa)
+    pathwise = required_para_fraction_for_pathwise_nonheating(pressure_Pa)
+    assert state_point == pytest.approx(0.9895650567602854, abs=1.0e-12)
+    assert pathwise == pytest.approx(0.9979505843112076, abs=1.0e-12)
+    assert pathwise > state_point
+    assert signed_equilibrium_heat_J_per_kg(
+        1.0 - state_point, pressure_Pa
+    ) == pytest.approx(0.0, abs=1.0e-7)
+
+
+def test_99p7_para_path_ledger_matches_paper_landmarks():
+    pressure_Pa = 50.0 * 6894.757293168
+    ledger = equilibrium_path_ledger(0.003, pressure_Pa)
+    assert ledger["initial_adverse_inventory_kJ_per_kg"] == pytest.approx(
+        0.6673101863, abs=1.0e-6
+    )
+    assert ledger["target_signed_equilibrium_heat_kJ_per_kg"] == pytest.approx(
+        -5.2193300284, abs=1.0e-6
+    )
+    assert ledger["crossover_pressure_kPa_abs"] == pytest.approx(
+        134.6022067, abs=1.0e-5
+    )
+    assert ledger["state_point_nonheating"] is True
+    assert ledger["pathwise_nonheating"] is False
+    assert ledger["target_sign"] == "absorbs heat"
+
+
+def test_pathwise_measurement_allowance_reports_infeasibility_without_clipping():
+    pressure_Pa = 50.0 * 6894.757293168
+    threshold = required_para_fraction_for_pathwise_nonheating(pressure_Pa)
+    adjusted_0p1, feasible_0p1 = apply_para_composition_allowance(
+        threshold, 0.1
+    )
+    adjusted_0p25, feasible_0p25 = apply_para_composition_allowance(
+        threshold, 0.25
+    )
+    assert 100.0 * adjusted_0p1 == pytest.approx(99.8950584311, abs=1.0e-9)
+    assert feasible_0p1 is True
+    assert 100.0 * adjusted_0p25 == pytest.approx(100.0450584311, abs=1.0e-9)
+    assert feasible_0p25 is False
+
+
+def test_crossover_and_credit_inputs_are_guarded():
+    temperature_K, pressure_Pa = crossover_saturation_state(0.01)
+    assert temperature_K > 20.0
+    assert 250000.0 < pressure_Pa < 400000.0
+    with pytest.raises(ValueError):
+        required_para_fraction_for_nonheating(-1.0)
+    with pytest.raises(ValueError):
+        equilibrium_path_ledger(1.1, 200000.0)
+    with pytest.raises(ValueError):
+        apply_para_composition_allowance(0.99, -0.1)
 
 
 def test_ideal_nozzle_choked_limit():

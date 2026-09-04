@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pifira"
-version = "0.2.0"
-description = "Pressure-based inverse fire analysis with evidence-gated LH2 ortho-para and nozzle utilities"
+version = "0.3.0"
+description = "Pressure-based inverse fire analysis with pathwise LH2 ortho-para credit screens"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"

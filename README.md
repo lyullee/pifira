@@ -12,7 +12,8 @@ analysis, with evidence-gated liquid-hydrogen utilities.
 1. estimating heat input and effective flame-contact area from pressure and
    wall-temperature histories of pressurized LPG tanks; and
 2. evaluating traceable liquid-hydrogen (LH2) ortho-para thermodynamics,
-   published Milenko/Petitpas kinetics, and a CoolProp HEOS nozzle closure.
+   state-point and pathwise composition screens, published Milenko/Petitpas
+   kinetics, and a CoolProp HEOS nozzle closure.
 
 > **No experimental or validation data are distributed in the repository,
 > source archive, or wheel.** The validation material belongs to its original
@@ -91,6 +92,39 @@ valve sizing method. In particular, the package does not infer a discharge
 coefficient, effective area, lift law or two-phase capacity for a commercial
 PSV from pressure cycling alone.
 
+### State-point and full-path OP criteria
+
+The state at relief and the complete warming path are deliberately separate
+claims. The following data-free calculation reproduces the 50 psia landmarks
+used in the associated method paper:
+
+```python
+from pifira.lh2 import (
+    apply_para_composition_allowance,
+    equilibrium_path_ledger,
+    required_para_fraction_for_nonheating,
+    required_para_fraction_for_pathwise_nonheating,
+)
+
+pressure_Pa = 50.0 * 6894.757293168
+state_point = required_para_fraction_for_nonheating(pressure_Pa)
+full_path = required_para_fraction_for_pathwise_nonheating(
+    pressure_Pa, initial_temperature_K=20.3
+)
+adjusted, feasible = apply_para_composition_allowance(full_path, 0.1)
+ledger = equilibrium_path_ledger(0.003, pressure_Pa)  # 99.7% para
+
+print(100 * state_point)  # 98.9565% para at the relief state
+print(100 * full_path)    # 99.7951% para over the declared path
+print(100 * adjusted, feasible)
+print(ledger["crossover_pressure_kPa_abs"])  # 134.6 kPa(abs)
+```
+
+The ledger is an equilibrium-direction accounting result. It neither predicts
+realized conversion heat without a kinetic path nor authorizes a reduction in
+standards-required or certified relief capacity. See
+[`examples/lh2_pathwise_credit.py`](examples/lh2_pathwise_credit.py).
+
 ## Public API
 
 | Area | Public objects |
@@ -100,6 +134,7 @@ PSV from pressure cycling alone.
 | Representative values | `heat_input_weighted_mean`, `simple_mean`, `coverage_fraction`, `normalized_flux`, `pressurization_number`, `orientation_factor` |
 | File input | `load_pressure_csv`, `load_temperature_csv` |
 | LH2 spin thermodynamics | `pifira.lh2.RigidRotorSpinThermo` |
+| LH2 composition credit screens | `required_para_fraction_for_nonheating`, `required_para_fraction_for_pathwise_nonheating`, `apply_para_composition_allowance`, `equilibrium_path_ledger` |
 | LH2 published kinetics | `pifira.lh2.MilenkoCorrelation`, `pifira.lh2.CorrelationDomainError` |
 | LH2 nozzle utility | `pifira.lh2.HEOSNozzleLookup`, `pifira.lh2.heos_nozzle_lookup` |
 

@@ -49,7 +49,7 @@ from .representative import (
 )
 from .io import load_pressure_csv, load_temperature_csv
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "TankSpec", "internal_energy", "liquid_height", "heat_input",
